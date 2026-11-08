@@ -4,7 +4,7 @@ class CurrencyFormatter {
   CurrencyFormatter._();
 
   // Change this one symbol to change the currency across the whole app.
-  static const String symbol = '\$';
+  static const String symbol = '\৳';
 
   static final NumberFormat _numberFormat = NumberFormat('#,##0.00');
 

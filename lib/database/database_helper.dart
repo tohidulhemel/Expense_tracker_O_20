@@ -5,7 +5,6 @@ import '../constants/app_strings.dart';
 import '../models/transaction_model.dart';
 
 class DatabaseHelper {
-  // Singleton: the whole app shares ONE DatabaseHelper instance.
   DatabaseHelper._internal();
   static final DatabaseHelper instance = DatabaseHelper._internal();
 
@@ -13,9 +12,7 @@ class DatabaseHelper {
   static const int _databaseVersion = 1;
   static const String tableTransactions = 'transactions';
 
-  // We store the Future (not the finished Database). The first call starts
-  // opening the database; any other call made at the same time reuses the
-  // same Future. So the database is never opened or created twice.
+
   Future<Database>? _database;
 
   Future<Database> get database {
@@ -30,7 +27,6 @@ class DatabaseHelper {
     return openDatabase(
       path,
       version: _databaseVersion,
-      // onCreate runs only the FIRST time, when the file doesn't exist yet.
       onCreate: _onCreate,
     );
   }
@@ -48,14 +44,11 @@ class DatabaseHelper {
     ''');
   }
 
-  /// Inserts a transaction and returns the new row's id.
   Future<int> insertTransaction(TransactionModel transaction) async {
     final db = await database;
     return db.insert(tableTransactions, transaction.toMap());
   }
 
-  /// Returns transactions, newest first. Pass [limit] to get only the
-  /// latest few (used for the dashboard's recent list).
   Future<List<TransactionModel>> getAllTransactions({int? limit}) async {
     final db = await database;
     final rows = await db.query(
@@ -80,7 +73,6 @@ class DatabaseHelper {
     return TransactionModel.fromMap(rows.first);
   }
 
-  /// Updates the row with the same id. Returns how many rows changed.
   Future<int> updateTransaction(TransactionModel transaction) async {
     if (transaction.id == null) {
       throw ArgumentError('Cannot update a transaction without an id.');
@@ -94,7 +86,6 @@ class DatabaseHelper {
     );
   }
 
-  /// Deletes the row with this id. Returns how many rows were deleted.
   Future<int> deleteTransaction(int id) async {
     final db = await database;
     return db.delete(
@@ -110,7 +101,6 @@ class DatabaseHelper {
 
   Future<double> _getTotalByType(String type) async {
     final db = await database;
-    // SUM() returns NULL when there are no rows; COALESCE turns that into 0.
     final result = await db.rawQuery(
       'SELECT COALESCE(SUM(amount), 0) AS total '
       'FROM $tableTransactions WHERE type = ?',
